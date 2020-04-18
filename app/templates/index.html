@@ -1,0 +1,77 @@
+<!doctype html>
+<title>My Application</title>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <span>{{ message }}</span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+{% block body %}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" 
+rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" 
+crossorigin="anonymous">
+
+<span id="pri"></span>
+<br><br><br>
+<span id="pub"></span>
+<br><br><br>
+<span id="test"></span>
+
+<script
+src="https://code.jquery.com/jquery-3.4.1.min.js"
+integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+crossorigin="anonymous"></script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" 
+integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" 
+crossorigin="anonymous"></script>
+
+<script 
+src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/2.3.1/jsencrypt.min.js" 
+integrity="sha256-WgvkBqG9+UolqdFC1BJOPcy961WTzXj7C9I034ndc4k=" 
+crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js"></script>
+
+<script>
+var keySize = 2048;
+
+var crypt = new JSEncrypt({ default_key_size: keySize });
+
+var pri = crypt.getPrivateKey()
+var pub = crypt.getPublicKey();
+
+console.log(pub)
+console.log(pri)
+
+
+var e = crypt.encrypt('aloha')
+console.log(e)
+console.log(crypt.decrypt(e))
+
+$("#pub").html(pub);
+$("#pri").html(pri);
+
+$.ajax({
+      url: "/generate_keys",
+      type: "post",
+      data: {"public": pub},
+      success: function(response) {
+        console.log(crypt.decrypt(atob(response["temp_login"])));
+        $("#test").html(
+            crypt.decrypt(atob(response["temp_login"]))
+        );
+      },
+      error: function(xhr) {
+        console.log(xhr);
+      }
+    });
+</script>
+
+{% endblock %}
